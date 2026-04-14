@@ -110,11 +110,13 @@ def main(args):
     for cls in classes:
         print(cls)
         img_path_list=glob(osp.join(args.data_root,dataset_name,cls,'*/*')) # get image path list
+        print('list')
+        print(osp.join(args.data_root,dataset_name,cls,'*/*'))
 
         for img_path in tqdm(img_path_list):
             pred_ori_images = get_reverse_denoise_results(pipe, img_path)  # get denoising outputs
 
-            out_dir = img_path.replace(args.data_root, args.denoising_output_root).split('.')[0]
+            out_dir = img_path.replace(args.data_root, args.denoising_root).split('.')[0]
             os.makedirs(out_dir, exist_ok=True)
             for i in range(0, len(pred_ori_images)):
                 latent = pred_ori_images[i]
@@ -126,13 +128,13 @@ def main(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--data-root', default=' ', type=str,
+    parser.add_argument('--data_root', default=' ', type=str,
                         help='the root directory of datasets')
     parser.add_argument('--dataset',default=' ',help='dataset name')
-    parser.add_argument('--denoising-root', default=' ', help='the directory for saving the denoising outputs')
-    parser.add_argument('--ckpt-path', type=str, default='runwayml/stable-diffusion-v1-5')
+    parser.add_argument('--denoising_root', default=' ', help='the directory for saving the denoising outputs')
+    parser.add_argument('--ckpt-path', type=str, default='runwayml/stable-diffusion-v1-5') #not used
     parser.add_argument('--device', type=str, default='cuda')
     args = parser.parse_args()
-    args.data_root = ''
-    args.dataset=''
+    #args.data_root = ''
+    #args.dataset=''
     main(args)
