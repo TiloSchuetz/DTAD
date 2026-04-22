@@ -58,7 +58,7 @@ def main(args):
         print(cls)
 
         real_image_list=sorted(glob(osp.join(args.data_root,dataset_name,cls,'0_real/*'))) # get real image path list
-        real_image_list=sorted(glob(osp.join(args.data_root,cls,'0_real/*')))
+        #real_image_list=sorted(glob(osp.join(args.data_root,cls,'0_real/*')))
         real_scores=[]
         for img_path in tqdm(real_image_list):
             denoising_dir=img_path.replace(args.data_root,args.denoising_output_root).split('.')[0]
@@ -67,7 +67,7 @@ def main(args):
         real_scores=torch.stack(real_scores,dim=0)
 
         fake_image_list=sorted(glob(osp.join(args.data_root,dataset_name,cls,'1_fake/*'))) # get fake image path list
-        fake_image_list=sorted(glob(osp.join(args.data_root,cls,'1_fake/*')))
+        #fake_image_list=sorted(glob(osp.join(args.data_root,cls,'1_fake/*')))
         fake_scores=[]
         for img_path in tqdm(fake_image_list):
             denoising_dir=img_path.replace(args.data_root,args.denoising_output_root).split('.')[0]
@@ -87,16 +87,11 @@ def main(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--data-root', default=' ', type=str,
+    parser.add_argument('--data_root', default=' ', type=str,
                         help='the root directory of datasets')
     parser.add_argument('--dataset',default=' ',help='dataset name')
-    parser.add_argument('--denoising-output-root', default=' ', help='the directory for saving the denoising outputs')
+    parser.add_argument('--denoising_output_root', default=' ', help='the directory for saving the denoising outputs')
     parser.add_argument('--device', type=str, default='cuda')
     args = parser.parse_args()
-
-    args.data_root=''
-    args.dataset=''
-    args.denoising_output_root=''
-    args.device='cuda'
 
     main(args)
