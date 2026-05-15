@@ -10,7 +10,7 @@ import argparse
 from clip_models import Model
 from glob import glob
 from tqdm import tqdm
-from sklearn.metrics import average_precision_score,accuracy_score
+from sklearn.metrics import average_precision_score,accuracy_score,roc_auc_score,f1_score
 from dataset_setting import TestDatasets
 
 clip = Model(
@@ -75,14 +75,28 @@ def main(args):
             fake_scores.append(score)
         fake_scores=torch.stack(fake_scores,dim=0)
 
-        #compute acc and ap
+        """ #compute acc and ap
         scores=np.concatenate((real_scores,fake_scores),axis=0)
         labels=np.asarray([0]*len(real_scores)+[1]*len(fake_scores))
         acc=accuracy_score(labels,scores>0.75)
         ap=average_precision_score(labels,np.concatenate((real_scores.cpu().numpy(),
                                                            fake_scores.cpu().numpy()),axis=0))
 
-        print(cls,f'Acc: {acc}, AP: {ap}')
+        print(cls)
+        print(f'Acc: {acc}, AP: {ap}') """
+
+        # compute metrics
+        scores = np.concatenate((real_scores.cpu().numpy(), fake_scores.cpu().numpy()), axis=0)
+        labels = np.asarray([0] * len(real_scores) + [1] * len(fake_scores))
+        preds = (scores > 0.75).astype(int)
+
+        acc = accuracy_score(labels, preds)
+        ap = average_precision_score(labels, scores)
+        auc = roc_auc_score(labels, scores)
+        f1 = f1_score(labels, preds)
+
+        print(cls)
+        print(f'Acc: {acc:.4f}, AP: {ap:.4f}, AUC: {auc:.4f}, F1: {f1:.4f}')
 
 
 if __name__ == '__main__':
