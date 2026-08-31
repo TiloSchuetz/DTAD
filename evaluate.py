@@ -14,7 +14,7 @@ from sklearn.metrics import average_precision_score,accuracy_score,roc_auc_score
 from dataset_setting import TestDatasets
 
 clip = Model(
-    backbone=("ViT-L/14", 1024),
+    backbone=("ViT-B/32", 768), #backbone=("ViT-L/14", 1024) or ("ViT-B/32", 768)
     device='cuda',
 ).to(torch.float32)
 clip_processor = transforms.Compose(
@@ -57,7 +57,19 @@ def main(args):
     for cls in classes:
         print(cls)
 
-        real_image_list=sorted(glob(osp.join(args.data_root,dataset_name,cls,'0_real/*'))) # get real image path list
+        if isinstance(classes, dict):
+            # paired layout: one fake folder, one matching real folder
+            real_image_list = sorted(glob(osp.join(args.data_root, dataset_name, classes[cls], '*')))
+            fake_image_list = sorted(glob(osp.join(args.data_root, dataset_name, cls, '*')))
+        else:
+            # ForenSynths-style layout: <cls>/0_real and <cls>/1_fake
+            real_image_list = sorted(glob(osp.join(args.data_root, dataset_name, cls, '0_real/*')))
+            fake_image_list = sorted(glob(osp.join(args.data_root, dataset_name, cls, '1_fake/*')))
+
+        assert len(real_image_list) > 0 and len(fake_image_list) > 0, \
+            f"No images found for {dataset_name}/{cls} under {args.data_root}"
+
+        #real_image_list=sorted(glob(osp.join(args.data_root,dataset_name,cls,'0_real/*'))) # get real image path list
         #real_image_list=sorted(glob(osp.join(args.data_root,cls,'0_real/*')))
         real_scores=[]
         for img_path in tqdm(real_image_list):
@@ -66,7 +78,7 @@ def main(args):
             real_scores.append(score)
         real_scores=torch.stack(real_scores,dim=0)
 
-        fake_image_list=sorted(glob(osp.join(args.data_root,dataset_name,cls,'1_fake/*'))) # get fake image path list
+        #fake_image_list=sorted(glob(osp.join(args.data_root,dataset_name,cls,'1_fake/*'))) # get fake image path list
         #fake_image_list=sorted(glob(osp.join(args.data_root,cls,'1_fake/*')))
         fake_scores=[]
         for img_path in tqdm(fake_image_list):
